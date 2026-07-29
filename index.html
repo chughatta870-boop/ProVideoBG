@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f0f1a"> <!-- style.css ke bg se match kiya -->
+  <meta name="description" content="Remove video background with AI. Free, No Watermark, 4K Export">
+  
+  <!-- iOS + Android PWA support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ProVideoBG">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <title>ProVideoBG - AI Video Background Remover</title>
+  
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png" type="image/png"> <!-- Favicon -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- AI Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+  <!-- FFmpeg for Video Export -->
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>ProVideoBG</h1>
+    <button id="exportBtn">Export MP4</button>
+  </header>
+
+  <main>
+    <section class="toolbar">
+      <div class="tool-group">
+        <label>Main Video:</label>
+        <input type="file" id="videoInput" accept="video/*">
+      </div>
+      
+      <div class="tool-group">
+        <label>Background Type:</label>
+        <select id="bgType">
+          <option value="color">Color</option>
+          <option value="image">Image</option>
+          <option value="video">Video</option>
+          <option value="blur">Blur</option>
+        </select>
+      </div>
+
+      <div class="tool-group" id="bgColorGroup">
+        <label>Color:</label>
+        <input type="color" id="bgColor" value="#00ff00">
+      </div>
+
+      <div class="tool-group" id="bgImageGroup" style="display:none">
+        <label>BG Image:</label>
+        <input type="file" id="bgImageInput" accept="image/*">
+      </div>
+
+      <div class="tool-group" id="bgVideoGroup" style="display:none">
+        <label>BG Video:</label>
+        <input type="file" id="bgVideoInput" accept="video/*">
+      </div>
+
+      <div class="tool-group">
+        <label>Smoothness:</label>
+        <input type="range" id="smoothness" min="0" max="10" value="5">
+        <span id="smoothnessVal">5</span> <!-- Value dikhane ke liye -->
+      </div>
+    </section>
+
+    <section class="preview">
+      <video id="inputVideo" style="display:none" muted playsinline></video>
+      <video id="bgVideo" style="display:none" muted loop playsinline></video>
+      <img id="bgImage" style="display:none" crossorigin="anonymous">
+      <canvas id="outputCanvas"></canvas>
+      <div class="loading" id="loading">
+        <p>Processing... <span id="progress">0%</span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    // Smoothness value show karo
+    document.getElementById('smoothness').oninput = (e) => {
+      document.getElementById('smoothnessVal').innerText = e.target.value;
+    }
+
+    // Register Service Worker
+    if('serviceWorker' in navigator){
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('SW Registered'))
+        .catch(err => console.log('SW Error:', err));
+      });
+    }
+  </script>
+</body>
+</html>
